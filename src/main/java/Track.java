@@ -1,5 +1,3 @@
-package main.java;
-
 import javafx.animation.PathTransition;
 import javafx.event.EventHandler;
 import javafx.geometry.BoundingBox;
