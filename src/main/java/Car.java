@@ -70,7 +70,7 @@ public class Car extends Rectangle {
      */
     @Override
     public String toString() {
-        return "Car #:" + id + "\tTime traveled: " + time;
+        return (id + 1) + "\t\t" + String.format("%.1f", time);
     }
 
 }
