@@ -1,12 +1,10 @@
 package main.java;
 
 import javafx.animation.PathTransition;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.effect.Glow;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -75,6 +73,10 @@ public class Track extends Group {
      */
     private Map<Car, ArrayList<Location>> carVisitedLocations;
 
+    private ArrayList<Text> locationLabels;
+    private ArrayList<Text> carLabels;
+    private Text activeCarLabel;
+    private Rectangle activeCarBox;
 
     /**
      * Initializes the collections for locations and cars.
@@ -86,6 +88,8 @@ public class Track extends Group {
         carStartLocation = new HashMap<>();
         carEndLocation = new HashMap<>();
         carCurrentLocation = new HashMap<>();
+        locationLabels = new ArrayList<>();
+        carLabels = new ArrayList<>();
     }
 
     /**
@@ -190,61 +194,55 @@ public class Track extends Group {
         gridPane.setAlignment(Pos.CENTER);
         gpLocations = new GridPane();
         gpLocations.setMaxSize(200, sceneY / 3);
-        gpLocations.add(new Text("Location"), 0, 0);
-        gpLocations.add(new Text("\tDistance (km)"), 1, 0);
+        gpLocations.add(new Text("Location\t\tDistance (km)"), 0, 0);
 
         for (int q = 0; q < locations.size(); q++) {
-            gpLocations.add(new Text(locations.get(q).getName()), 0, q + 1);
-            String dist = String.format("%.1f", carCurrentLocation.get(activeCar).getDistanceToLocation(locations.get(q)));
-            gpLocations.add(new Text("\t\t" + dist), 1, q + 1);
+            gpLocations.add(new Text((locations.get(q).getName()) + "\t\t"), 0, q + 1);
+            Text t = new Text(String.format("%.1f", carCurrentLocation.get(activeCar).getDistanceToLocation(locations.get(q))));
+            locationLabels.add(t);
+            gpLocations.add(t, 1, q + 1);
         }
 
         gpCars = new GridPane();
         gpCars.setMaxSize(200, sceneY / 3);
-        gpCars.add(new Text("Car"), 0, 0);
-        gpCars.add(new Text("\tTime (hr)"), 1, 0);
+        gpCars.add(new Text("Car\t\tTime (hr)\t\tCurrent\t\tEnd"), 0, 0);
 
-        for (int nums = 0; nums < cars.size(); nums++) {
-            gpCars.add(new Text(Integer.toString(cars.get(nums).getIdentifier())), 0, nums + 1);
-            String dist = String.format("%.1f", cars.get(nums).getTime());
-            gpCars.add(new Text("\t\t" + dist), 1, nums + 1);
+        for (int j = 0; j < cars.size(); j++) {
+            Text t = new Text(cars.get(j).toString() + "\t\t\t"
+                    + carCurrentLocation.get(cars.get(j)).getName() + "\t"
+                    + carEndLocation.get(cars.get(j)).getName());//String.format("%.1f", cars.get(nums).getTime()));
+            carLabels.add(t);
+            gpCars.add(t, 0, j + 1);
         }
+
+        activeCarLabel = new Text("Active Car:\t" + (activeCar.getIdentifier() + 1));
+        activeCarLabel.setFill(Color.DARKGREEN);
+        activeCarLabel.setFont(Font.font(30));
+        activeCarBox = new Rectangle(activeCar.getWidth(), activeCar.getHeight());
+        activeCarBox.setFill(activeCar.getFill());
 
         gridPane.add(gpLocations, 0, 1);
         gridPane.add(new Rectangle(200, 200, Color.TRANSPARENT), 0, 2);
         gridPane.add(gpCars, 0, 3);
-        gridPane.add(new Rectangle(200, 200, Color.TRANSPARENT), 0, 3);
-        gridPane.add(new Text("Active Car\t" + activeCar.getIdentifier() + "\t" + carEndLocation.get(activeCar).getName()), 0, 5);
+        gridPane.add(new Rectangle(200, 200, Color.TRANSPARENT), 0, 4);
+        gridPane.add(activeCarLabel, 0, 5);
+        gridPane.add(activeCarBox, 0, 6);
         gridPane.setLayoutX(sceneX - 300);
         this.getChildren().add(gridPane);
     }
 
     /**
-     * TODO: Refactor.
      * Updates the cars statistics within the gridPane
      */
     public void updateStats() {
-        ObservableList<Node> children = gpLocations.getChildren();
-        for (int i = 0; i < gpLocations.getChildren().size() / 2; i++)
-            for (Node n : children)
-                if (GridPane.getRowIndex(n) == i + 1 && GridPane.getColumnIndex(n) == 1) {
-                    Text t = (Text) n;
-                    t.setText(String.format(
-                            "\t\t%.1f", carCurrentLocation.get(activeCar).getDistanceToLocation(locations.get(i))));
-                }
-        children = gpCars.getChildren();
-        for (int j = 0; j < gpCars.getChildren().size() / 2; j++)
-            for (Node m : children)
-                if (GridPane.getRowIndex(m) == j + 1 && GridPane.getColumnIndex(m) == 1) {
-                    Text tmpM = (Text) m;
-                    tmpM.setText(String.format("\t\t%.1f", cars.get(j).getTime()));
-                }
-        children = gridPane.getChildren();
-        for (Node o : children)
-            if (GridPane.getRowIndex(o) == 5 && GridPane.getColumnIndex(o) == 0) {
-                Text tmpO = (Text) o;
-                tmpO.setText("Active Car\t" + activeCar.getIdentifier() + " " + carEndLocation.get(activeCar).getName());
-            }
+        for (int i = 0; i < cars.size(); i++)
+            carLabels.get(i).setText(cars.get(i).toString() + "\t\t\t" + carCurrentLocation.get(cars.get(i)).getName()
+                    + "\t" + carEndLocation.get(cars.get(i)).getName());
+        for (int j = 0; j < locations.size(); j++)
+            locationLabels.get(j).setText(
+                    String.format("%.1f", carCurrentLocation.get(activeCar).getDistanceToLocation(locations.get(j))));
+        activeCarLabel.setText("Active Car:\t" + (activeCar.getIdentifier() + 1));
+        activeCarBox.setFill(activeCar.getFill());
     }
 
     /**
