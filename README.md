@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/macrzen/RaceGame.svg?branch=master)](https://travis-ci.org/macrzen/RaceGame)
+
 # RaceGame
 
 RaceGame for CS 225 with Prof. Moussavi.
